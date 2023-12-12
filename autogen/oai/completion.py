@@ -11,6 +11,10 @@ from flaml.automl.logger import logger_formatter
 from .openai_utils import get_key
 from collections import defaultdict
 
+### 避免1分钟3次的openai api 限流
+WAIT_SECONDS = 25  # 等待的时间间隔（秒）
+last_request_time = None  # 上次执行request的时间
+
 try:
     import openai
     from openai.error import (
@@ -218,10 +222,23 @@ class Completion(openai_Completion):
         retry_wait_time = config.pop("retry_wait_time", cls.retry_wait_time)
         while True:
             try:
+
+                global last_request_time  # 声明last_request_time为全局变量
+                current_time = time.time()  # 获取当前时间
+                
+                if last_request_time is not None:
+                    time_elapsed = current_time - last_request_time
+                    if time_elapsed < WAIT_SECONDS:
+                        print(f"avoid rate limit waiting ", WAIT_SECONDS - time_elapsed)
+                        time.sleep(WAIT_SECONDS - time_elapsed)  # 等待直到超过WAIT_SECONDS
+                
+                last_request_time = current_time  # 记录当前时间为上次执行request的时间
+                
                 if "request_timeout" in config:
                     response = openai_completion.create(**config)
                 else:
                     response = openai_completion.create(request_timeout=request_timeout, **config)
+            
             except (
                 ServiceUnavailableError,
                 APIConnectionError,

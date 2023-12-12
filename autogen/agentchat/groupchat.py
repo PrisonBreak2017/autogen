@@ -6,7 +6,12 @@ from .conversable_agent import ConversableAgent
 import logging
 
 logger = logging.getLogger(__name__)
+try:
+    from termcolor import colored
+except ImportError:
 
+    def colored(x, *args, **kwargs):
+        return x
 
 @dataclass
 class GroupChat:
@@ -160,6 +165,10 @@ class GroupChatManager(ConversableAgent):
             try:
                 # select the next speaker
                 speaker = groupchat.select_speaker(speaker, self)
+                print(
+                    colored(f"\n>>>>>>>> speaker  {speaker}...", "green"),
+                    flush=True,
+                )
                 # let the speaker speak
                 reply = speaker.generate_reply(sender=self)
             except KeyboardInterrupt:

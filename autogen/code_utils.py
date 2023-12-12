@@ -15,8 +15,10 @@ try:
 except ImportError:
     docker = None
 
-DEFAULT_MODEL = "gpt-4"
-FAST_MODEL = "gpt-3.5-turbo"
+#WDJ 不用docker
+docker = None
+DEFAULT_MODEL = "gpt-3.5-turbo-16k"
+FAST_MODEL = "gpt-3.5-turbo-16k"
 # Regular expression for finding a code block
 CODE_BLOCK_PATTERN = r"```(\w*)\n(.*?)\n```"
 WORKING_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "extensions")
